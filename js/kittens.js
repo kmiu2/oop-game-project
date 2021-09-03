@@ -170,22 +170,22 @@ class Engine {
     }
 
     addProjectile(){
-        //TODO: Shoot and allow only one proj on screen at time
-        // - one option is to check if it is off screen or not yet before allowing
         if (!this.proj.isOnScreen) {
             this.proj = new Projectile(this.player.x, GAME_HEIGHT - PLAYER_HEIGHT, true);
-            var audio = new Audio('shoot.mp3');
-            audio.play();
+            let shootAudio = new Audio('shoot.mp3');
+            shootAudio.play();
         }
     }
-
+    
     // This method kicks off the game
     start() {
+        // Reset it all
         document.getElementById("playButton").disabled = true;
-
-        // Set up bgm
-        var audio = new Audio('bgm.mp3');
-        audio.play();
+        this.enemies = [];
+        
+        this.bgmAudio = new Audio('bgm.mp3');
+        this.bgmAudio.currentTime = 0
+        this.bgmAudio.play();
 
         this.score = 0;
         this.lastFrame = Date.now();
@@ -259,6 +259,12 @@ class Engine {
             this.ctx.font = 'bold 30px Impact';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText(this.score + ' GAME OVER', 5, 30);
+
+            this.bgmAudio.pause();
+            this.bgmAudio.currentTime = 0;
+            
+            let shootAudio = new Audio('defeat.mp3');
+            shootAudio.play();
         }
         else {
             // If player is not dead, then draw the score
@@ -273,7 +279,7 @@ class Engine {
     }
 
     isPlayerDead() {
-      var state = false; 
+      var state = false;
       this.enemies.forEach((enemy) => {
         if ((enemy.x >= this.player.x) && (enemy.x < this.player.x + PLAYER_WIDTH)) {
             if ((enemy.y + ENEMY_HEIGHT >= this.player.y)) {
