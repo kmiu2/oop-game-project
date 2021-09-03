@@ -173,12 +173,20 @@ class Engine {
         //TODO: Shoot and allow only one proj on screen at time
         // - one option is to check if it is off screen or not yet before allowing
         if (!this.proj.isOnScreen) {
-            this.proj = new Projectile(this.player.x, GAME_HEIGHT - PLAYER_HEIGHT, true)
+            this.proj = new Projectile(this.player.x, GAME_HEIGHT - PLAYER_HEIGHT, true);
+            var audio = new Audio('shoot.mp3');
+            audio.play();
         }
     }
 
     // This method kicks off the game
     start() {
+        document.getElementById("playButton").disabled = true;
+
+        // Set up bgm
+        var audio = new Audio('bgm.mp3');
+        audio.play();
+
         this.score = 0;
         this.lastFrame = Date.now();
 
@@ -276,4 +284,4 @@ class Engine {
 
 // This section will start the game
 var gameEngine = new Engine(document.getElementById('app'));
-gameEngine.start();
+// gameEngine.start();
