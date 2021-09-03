@@ -1,5 +1,9 @@
 # Object Oriented Programming Game Project
 
+## Preface
+This quick project was done in an afternoon during Polar's Orientation Bootcamp. Base code credit goes to them.
+See the final result here: https://kmiu2.github.io/oop-game-project/
+
 <h2 align="center">I CAN HAZ CHEEZBURGER?!??</h2>
 <p align="center"><img src="screenshot.png"></p>
 
