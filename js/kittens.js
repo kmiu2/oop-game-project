@@ -31,10 +31,15 @@ var images = {};
 
 
 
+class Entity {
+    render(ctx) {
+        ctx.drawImage(this.sprite, this.x, this.y);
+    }
+}
 
-
-class Enemy {
+class Enemy extends Entity {
     constructor(xPos) {
+        super();
         this.x = xPos;
         this.y = -ENEMY_HEIGHT;
         this.sprite = images['enemy.png'];
@@ -48,12 +53,13 @@ class Enemy {
     }
 
     render(ctx) {
-        ctx.drawImage(this.sprite, this.x, this.y);
+      super.render(ctx);
     }
 }
 
-class Player {
+class Player extends Entity {
     constructor() {
+        super();
         this.x = 2 * PLAYER_WIDTH;
         this.y = GAME_HEIGHT - PLAYER_HEIGHT - 10;
         this.sprite = images['player.png'];
@@ -70,11 +76,11 @@ class Player {
     }
 
     render(ctx) {
-        ctx.drawImage(this.sprite, this.x, this.y);
+      super.render(ctx);
     }
 }
 
-// TODO: 
+// TODO:
 // - Add delay before shooting
 // - dont spam space
 // - actually make the thing kill
@@ -229,7 +235,7 @@ class Engine {
 
         // Update Projectile
         this.proj.update(timeDiff);
-        
+
         // Draw everything!
         this.ctx.drawImage(images['stars.png'], 0, 0); // draw the star bg
         this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the enemies
@@ -245,7 +251,7 @@ class Engine {
             // Projectile collision
             if ((enemy.x < this.proj.x && this.proj.x < enemy.x + ENEMY_WIDTH) &&
                 (enemy.y < this.proj.y && this.proj.y < enemy.y + ENEMY_HEIGHT)) {
-                
+
                 delete this.enemies[enemyIdx];
                 this.proj.setOffScreen();
                 this.score += 1000;
@@ -273,14 +279,14 @@ class Engine {
     }
 
     isPlayerDead() {
-      var state = false; 
+      var state = false;
       this.enemies.forEach((enemy) => {
         if ((enemy.x >= this.player.x) && (enemy.x < this.player.x + PLAYER_WIDTH)) {
             if ((enemy.y + ENEMY_HEIGHT >= this.player.y)) {
-              state = true; 
+              state = true;
             }
         }
-      }); 
+      });
       return state;
     }
 }
