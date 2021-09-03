@@ -9,9 +9,13 @@ var MAX_ENEMIES = 3;
 var PLAYER_WIDTH = 75;
 var PLAYER_HEIGHT = 54;
 
+const PROJ_WIDTH = 50;
+const PROJ_HEIGHT = 50;
+
 // These two constants keep us from using "magic numbers" in our code
 var LEFT_ARROW_CODE = 37;
 var RIGHT_ARROW_CODE = 39;
+const SPACE_CODE = 32;
 
 // These two constants allow us to DRY
 var MOVE_LEFT = 'left';
@@ -19,7 +23,7 @@ var MOVE_RIGHT = 'right';
 
 // Preload game images
 var images = {};
-['enemy.png', 'stars.png', 'player.png'].forEach(imgName => {
+['enemy.png', 'stars.png', 'player.png', 'cookie.png'].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
@@ -70,7 +74,37 @@ class Player {
     }
 }
 
+// TODO: 
+// - Add delay before shooting
+// - dont spam space
+// - actually make the thing kill
+class Projectile {
+    constructor(xPos, yPos, isOnScreen) {
+        this.x = xPos + 13;     // 13 is to center it on the player
+        this.y = yPos;
+        this.sprite = images['cookie.png'];
+        this.speed = -0.22;
+        this.isOnScreen = isOnScreen;
+    }
 
+    setOffScreen(){
+        this.y = -9999;
+        this.isOnScreen = false;
+    }
+
+    update(timeDiff) {
+        if (this.y > -PROJ_HEIGHT){
+            this.y = this.y + timeDiff * this.speed;
+        }
+        else {
+            this.isOnScreen = false
+        }
+    }
+
+    render(ctx) {
+        ctx.drawImage(this.sprite, this.x, this.y);
+    }
+}
 
 
 
@@ -83,6 +117,9 @@ class Engine {
     constructor(element) {
         // Setup the player
         this.player = new Player();
+
+        // Set up projectile
+        this.proj = new Projectile(-2*PROJ_WIDTH, -2*PROJ_HEIGHT, false);
 
         // Setup enemies, making sure there are always three
         this.setupEnemies();
@@ -132,6 +169,14 @@ class Engine {
         this.enemies[enemySpot] = new Enemy(enemySpot * ENEMY_WIDTH);
     }
 
+    addProjectile(){
+        //TODO: Shoot and allow only one proj on screen at time
+        // - one option is to check if it is off screen or not yet before allowing
+        if (!this.proj.isOnScreen) {
+            this.proj = new Projectile(this.player.x, GAME_HEIGHT - PLAYER_HEIGHT, true)
+        }
+    }
+
     // This method kicks off the game
     start() {
         this.score = 0;
@@ -144,6 +189,9 @@ class Engine {
             }
             else if (e.keyCode === RIGHT_ARROW_CODE) {
                 this.player.move(MOVE_RIGHT);
+            }
+            else if (e.keyCode === SPACE_CODE) {
+                this.addProjectile();
             }
         });
 
@@ -171,15 +219,28 @@ class Engine {
         // Call update on all enemies
         this.enemies.forEach(enemy => enemy.update(timeDiff));
 
+        // Update Projectile
+        this.proj.update(timeDiff);
+        
         // Draw everything!
         this.ctx.drawImage(images['stars.png'], 0, 0); // draw the star bg
         this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the enemies
         this.player.render(this.ctx); // draw the player
+        this.proj.render(this.ctx); // draw the projectile
 
         // Check if any enemies should die
         this.enemies.forEach((enemy, enemyIdx) => {
             if (enemy.y > GAME_HEIGHT) {
                 delete this.enemies[enemyIdx];
+            }
+
+            // Projectile collision
+            if ((enemy.x < this.proj.x && this.proj.x < enemy.x + ENEMY_WIDTH) &&
+                (enemy.y < this.proj.y && this.proj.y < enemy.y + ENEMY_HEIGHT)) {
+                
+                delete this.enemies[enemyIdx];
+                this.proj.setOffScreen();
+                this.score += 1000;
             }
         });
         this.setupEnemies();
